@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional
 
 from app.config import CHAT_ID, PENDING_URL_TTL_SECONDS
 from app.logger import get_logger
-from app.stores import detect_store
+from app.stores import detect_store, get_checker
 from app.telegram import get_updates, send_message
 from app.watchlist import find_entry, make_id, new_entry
 
@@ -58,6 +58,7 @@ def _handle_message(bot_state: Dict[str, Any], watchlist: List[dict], chat_id: s
             return
 
         store, product_id = detection
+        url = get_checker(store).normalize_url(url)
 
         # Same message also contains a pincode -> register immediately.
         inline_pincode = INLINE_PINCODE_RE.search(text.replace(url, ""))

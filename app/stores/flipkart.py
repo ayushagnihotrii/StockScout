@@ -31,6 +31,14 @@ class FlipkartChecker(StoreChecker):
             return match.group(1)
         return None
 
+    @staticmethod
+    def normalize_url(url: str) -> str:
+        # Flipkart's "Share" button produces dl.flipkart.com links. The path
+        # already contains the full slug + PID, but the domain itself
+        # serves an app-deep-link interstitial that reliably hangs/blocks
+        # automated browsers -- so just swap it for the canonical host.
+        return url.replace("dl.flipkart.com", "www.flipkart.com", 1)
+
     def apply_pincode(self, page: Page, pincode: str) -> bool:
         try:
             pincode_input = page.get_by_placeholder("Enter Delivery Pincode")

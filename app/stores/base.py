@@ -30,6 +30,13 @@ class StoreChecker(ABC):
         """Return the store's canonical product id, or None if `url` doesn't
         belong to this store."""
 
+    @staticmethod
+    def normalize_url(url: str) -> str:
+        """Rewrite a share/short link to a directly-navigable canonical URL.
+        Default is a no-op; override for stores with share-link domains
+        that don't load reliably in an automated browser."""
+        return url
+
     @abstractmethod
     def apply_pincode(self, page: Page, pincode: str) -> bool:
         """Fill in the delivery pincode if prompted. Returns True if it was
