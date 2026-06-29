@@ -64,8 +64,9 @@ def _check_entry(session: BrowserSession, entry: WatchlistEntry) -> None:
                 entry["last_checked"] = _now()
                 return
 
-            entry["pincode_applied"] = checker.apply_pincode(page, entry["pincode"])
-            result = checker.get_stock_status(page)
+            pincode_applied = checker.apply_pincode(page, entry["pincode"])
+            entry["pincode_applied"] = pincode_applied
+            result = checker.get_stock_status(page, pincode_applied)
             logger.info("[%s] status=%s price=%s", entry["id"], result.status, result.price)
 
             _handle_entry_change(entry, result)

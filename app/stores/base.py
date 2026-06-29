@@ -43,8 +43,12 @@ class StoreChecker(ABC):
         actually applied (used to flag possibly-wrong-region results)."""
 
     @abstractmethod
-    def get_stock_status(self, page: Page) -> StockResult:
-        ...
+    def get_stock_status(self, page: Page, pincode_applied: bool = False) -> StockResult:
+        """`pincode_applied` tells the checker whether the delivery
+        location it's looking at is actually the one we asked for -- some
+        stores show a generic, location-agnostic "not deliverable" message
+        to any guest session with no confirmed address, which must not be
+        treated as a real unavailability signal."""
 
     def validate(self, page: Page, expected_product_id: str) -> ValidationResult:
         """Confirm the page still resolves to the product we registered --

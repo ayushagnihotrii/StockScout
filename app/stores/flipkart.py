@@ -54,14 +54,21 @@ class FlipkartChecker(StoreChecker):
             logger.warning("Could not set Flipkart pincode: %s", exc)
         return False
 
-    def get_stock_status(self, page: Page) -> StockResult:
+    def get_stock_status(self, page: Page, pincode_applied: bool = False) -> StockResult:
         title = self._get_title(page)
         price = self._get_price(page)
         signals = self._collect_signals(page)
-        logger.info("Flipkart stock signals: %s", signals)
+        logger.info("Flipkart stock signals: %s (pincode_applied=%s)", signals, pincode_applied)
 
         positive = signals["buy_now"] or signals["add_to_cart"]
-        negative = signals["sold_out"] or signals["unavailable"] or signals["delivery_unavailable"]
+        negative = signals["sold_out"] or signals["unavailable"]
+        # "Not deliverable"/"Delivery unavailable" is shown generically by
+        # Flipkart for ANY guest session with no confirmed address -- it is
+        # not evidence the product is actually unavailable. Only treat it
+        # as a real negative signal once we've confirmed the pincode we
+        # actually applied is the one driving this message.
+        if pincode_applied:
+            negative = negative or signals["delivery_unavailable"]
 
         if negative:
             status = "OUT_OF_STOCK"

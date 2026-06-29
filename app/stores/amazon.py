@@ -71,7 +71,7 @@ class AmazonChecker(StoreChecker):
         except Exception:
             return False
 
-    def get_stock_status(self, page: Page) -> StockResult:
+    def get_stock_status(self, page: Page, pincode_applied: bool = False) -> StockResult:
         title = (page.title() or "").strip()
 
         if self._is_captcha(page):
