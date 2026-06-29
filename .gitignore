@@ -1,0 +1,8 @@
+.venv/
+.env
+playwright-report/
+__pycache__/
+*.pyc
+profile/
+screenshots/
+*.png
