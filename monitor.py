@@ -22,7 +22,7 @@ from app.watchlist import WatchlistEntry, load_watchlist, save_watchlist
 logger = get_logger(__name__)
 
 MAX_RETRIES = 2
-RETRY_DELAY_SECONDS = 3
+RETRY_DELAY_SECONDS = 8
 
 
 def run_once() -> None:

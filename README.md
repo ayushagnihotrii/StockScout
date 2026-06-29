@@ -13,10 +13,11 @@ turned off.
 2. Every 5 minutes, a GitHub Actions workflow runs `monitor.py`, which:
    - Polls Telegram for any new messages and turns them into watchlist
      registrations (see the conversation flow below).
-   - Opens each tracked product in Playwright Chromium, applies the saved
-     pincode, and reads stock/price from multiple signals (Buy Now / Add
-     to Cart vs. Sold Out / Unavailable / undeliverable text) — never a
-     single fragile check.
+   - Opens each tracked product in Playwright Chromium, tries to apply the
+     saved pincode, and reads **general** stock/price from multiple
+     signals (Buy Now / Add to Cart vs. Sold Out / Unavailable) — never a
+     single fragile check. See "Pincode accuracy" below for what this
+     does and doesn't confirm about your specific location.
    - Notifies you on Telegram only when a product's status or price
      actually changes, never on every run.
 3. There is no server and no database. `watchlist.json` and
@@ -106,6 +107,29 @@ Setup:
 On repeated per-product failures, a screenshot is uploaded as a workflow
 artifact and a Telegram error is sent — one bad product never blocks the
 rest of the watchlist.
+
+## Pincode accuracy: general availability only, not location-confirmed
+
+You submit a pincode when registering a product, and the bot tries to
+apply it (`apply_pincode`), but **Flipkart's guest address picker doesn't
+work in an automated browser** — it's a map-search widget that never
+returns location suggestions for a headless session, and there's no URL
+parameter that bypasses it either. As a result, notifications reflect
+**general product availability** (Buy Now/Add to Cart visible vs. Sold
+Out/Unavailable) — not confirmed delivery to your exact pincode.
+
+Two important consequences of this:
+- Flipkart shows a generic "Not deliverable at your location" message to
+  *any* guest session with no confirmed address, regardless of whether
+  the product would actually ship anywhere. The checker ignores this
+  message unless `apply_pincode` actually confirmed it applied (tracked
+  per-entry as `pincode_applied` in `watchlist.json`) — otherwise a
+  perfectly in-stock product would falsely report `OUT_OF_STOCK` forever.
+- If you want delivery confirmed to your real address, run `login.py`
+  locally, log into your actual Flipkart account, and save your address.
+  Local runs (on your own machine) will then reflect your real saved
+  address. This does **not** carry over to the GitHub Actions cron, since
+  a logged-in session can't be committed to a public repo.
 
 ## Amazon is less reliable than Flipkart
 
